@@ -17,5 +17,7 @@ artifacts/*.tmp
 .env
 .env.*
 !.env.example
+!.env.development
+!.env.production
 .DS_Store
 Thumbs.db

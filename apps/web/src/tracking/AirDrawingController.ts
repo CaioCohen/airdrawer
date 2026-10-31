@@ -26,7 +26,7 @@ export class AirDrawingController {
   private ownsStroke = false;
   private transition = false;
 
-  constructor(private readonly strokes: StrokeController, { smoothingAlpha = 0.55, maxJump = 0.3 }: AirDrawingOptions = {}) {
+  constructor(private readonly strokes: StrokeController, { smoothingAlpha = 0.35, maxJump = 0.3 }: AirDrawingOptions = {}) {
     if (!Number.isFinite(smoothingAlpha) || smoothingAlpha <= 0 || smoothingAlpha > 1 || !Number.isFinite(maxJump) || maxJump <= 0) throw new RangeError("Invalid air-drawing smoothing options.");
     this.smoothingAlpha = smoothingAlpha;
     this.maxJump = maxJump;

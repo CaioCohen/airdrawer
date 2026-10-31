@@ -1,16 +1,70 @@
 import { SHAPE_LABELS, type Drawing, type ShapeLabel } from "@airdraw/contracts";
 import { useEffect, useState } from "react";
 import { createReference, loadReferences, parseReference, saveReferences, type DrawingReference, type InputMode } from "./referenceStore";
+import { pngExportMode, reserveDownloadFilename } from "./pngExport";
 
-function download(name: string, blob: Blob) { const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = name; anchor.click(); URL.revokeObjectURL(url); }
+function download(name: string, blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = name;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 export function ReferencePanel({ drawing, mode, onLoad, exportPng }: { drawing: Drawing; mode: InputMode; onLoad: (reference: DrawingReference) => void; exportPng: () => Promise<Blob | null> }) {
-  const [label, setLabel] = useState<ShapeLabel>("circle"); const [confirmed, setConfirmed] = useState(false); const [references, setReferences] = useState<DrawingReference[]>([]); const [message, setMessage] = useState<string | null>(null);
+  const [label, setLabel] = useState<ShapeLabel>("circle");
+  const [confirmed, setConfirmed] = useState(false);
+  const [references, setReferences] = useState<DrawingReference[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
   useEffect(() => { setReferences(loadReferences(window.localStorage)); }, []);
   const persist = (next: DrawingReference[]) => { saveReferences(window.localStorage, next); setReferences(next); };
-  const save = () => { try { const reference = createReference(drawing, label, mode); persist([reference, ...references]); setConfirmed(false); setMessage("Referência salva somente neste navegador."); } catch (error) { setMessage(error instanceof Error ? error.message : "Não foi possível salvar a referência."); } };
+  const save = () => {
+    try {
+      const reference = createReference(drawing, label, mode);
+      persist([reference, ...references]);
+      setConfirmed(false);
+      setMessage("Referência salva somente neste navegador.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Não foi possível salvar a referência.");
+    }
+  };
   const exportJson = (reference: DrawingReference) => download(`airdraw-${reference.label ?? "reference"}-${reference.createdAt.slice(0, 10)}.json`, new Blob([JSON.stringify(reference, null, 2)], { type: "application/json" }));
-  const importFile = async (file: File | undefined) => { if (!file) return; try { const reference = parseReference(await file.text()); persist([reference, ...references]); setMessage("Referência importada localmente."); } catch (error) { setMessage(error instanceof Error ? error.message : "Não foi possível importar o arquivo."); } };
-  const exportCurrentPng = async () => { const blob = await exportPng(); if (blob) download("airdraw-reference.png", blob); else setMessage("Não foi possível gerar o PNG da lousa."); };
+  const importFile = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const reference = parseReference(await file.text());
+      persist([reference, ...references]);
+      setMessage("Referência importada localmente.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Não foi possível importar o arquivo.");
+    }
+  };
+  const exportCurrentPng = async () => {
+    const blob = await exportPng();
+    if (!blob) {
+      setMessage("Não foi possível gerar o PNG da lousa.");
+      return;
+    }
+    if (pngExportMode === "download") {
+      const filename = reserveDownloadFilename(window.localStorage, label);
+      download(filename, blob);
+      setMessage(`PNG baixado como ${filename}.`);
+      return;
+    }
+    try {
+      const response = await fetch("/api/export-whiteboard-png", {
+        method: "POST",
+        headers: { "Content-Type": "image/png", "X-AirDraw-Label": label },
+        body: blob,
+      });
+      const payload = await response.json() as { filename?: string; error?: string };
+      if (!response.ok || !payload.filename) throw new Error(payload.error ?? "O servidor não confirmou a exportação.");
+      setMessage(`PNG salvo em docs/images/${payload.filename}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? `Não foi possível salvar o PNG: ${error.message}` : "Não foi possível salvar o PNG. Execute a aplicação com pnpm dev.");
+    }
+  };
   const hasInk = drawing.strokes.length > 0;
   return <section className="references" aria-label="Salvar referência"><h2>Salvar referência</h2><p>Ao salvar, guardamos apenas os traços da lousa neste navegador — nunca vídeo, frames ou landmarks da câmera.</p><label>Rótulo <select value={label} onChange={(event) => setLabel(event.target.value as ShapeLabel)} disabled={!hasInk}>{SHAPE_LABELS.map((item) => <option key={item} value={item}>{item}</option>)}</select></label><label className="consent"><input type="checkbox" checked={confirmed} disabled={!hasInk} onChange={(event) => setConfirmed(event.target.checked)} /> Confirmo que quero salvar os traços, não o vídeo.</label><button type="button" disabled={!hasInk || !confirmed} onClick={save}>Salvar localmente</button><button type="button" disabled={!hasInk} onClick={() => void exportCurrentPng()}>Exportar PNG da lousa</button><label className="import">Importar JSON <input type="file" accept="application/json,.json" onChange={(event) => void importFile(event.target.files?.[0])} /></label>{message && <p role="status">{message}</p>}<h3>Referências locais</h3>{references.length === 0 ? <p>Nenhuma referência local salva.</p> : <ul>{references.map((reference, index) => <li key={`${reference.createdAt}-${index}`}><span>{reference.label ?? "sem rótulo"} — {new Date(reference.createdAt).toLocaleString()}</span> <button type="button" onClick={() => onLoad(reference)}>Revisar</button> <button type="button" onClick={() => exportJson(reference)}>Exportar JSON</button> <button type="button" onClick={() => { const next = references.filter((_, itemIndex) => itemIndex !== index); persist(next); }}>Apagar</button></li>)}</ul>}</section>;
 }

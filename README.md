@@ -27,7 +27,12 @@ Abra a URL informada pelo Vite em `localhost` ou use HTTPS: navegadores só conc
 
 A câmera só é solicitada após o clique em **Iniciar câmera**. Vídeo, frames e landmarks não são armazenados nem enviados: eles são usados em memória apenas para desenhar a prévia e o cursor.
 
-O painel **Salvar referência** só libera a ação após haver traços e confirmação explícita. Ele grava somente os strokes da lousa no `localStorage` deste navegador. A referência pode ser revisada, exportada como JSON/PNG ou apagada. A importação JSON é validada antes de ser aceita. Capturas humanas voluntárias devem ser exportadas e importadas conscientemente; `datasets/real-test/` é ignorado pelo Git e não entra automaticamente em treino.
+O painel **Salvar referência** só libera a ação após haver traços e confirmação explícita. Ele grava somente os strokes da lousa no `localStorage` deste navegador. A referência pode ser revisada, exportada como JSON/PNG ou apagada.
+
+- Em `pnpm dev`, **Exportar PNG da lousa** grava automaticamente em `docs/images/` como `rotulo-n.png` (por exemplo, `circle-1.png`, depois `circle-2.png`).
+- Em uma build publicada, o mesmo botão faz download automático com `rotulo-n.png`; o contador é local ao navegador, pois uma hospedagem estática não pode enumerar ou escrever em `docs/images/`.
+
+O modo é controlado por `VITE_PNG_EXPORT_MODE`: `.env.development` usa `local-server` e `.env.production` usa `download`. Valores inválidos, ou `local-server` em produção, interrompem a inicialização para impedir uma publicação configurada incorretamente. Variáveis `VITE_*` são públicas: nunca armazene segredos nelas. A importação JSON é validada antes de ser aceita. Capturas humanas voluntárias devem ser exportadas e importadas conscientemente; `datasets/real-test/` é ignorado pelo Git e não entra automaticamente em treino.
 
 ## Limitações conhecidas
 
