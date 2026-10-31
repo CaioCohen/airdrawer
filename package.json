@@ -1,0 +1,19 @@
+{
+  "name": "airdraw",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "engines": { "node": ">=20.11.0", "pnpm": ">=9.15.4" },
+  "scripts": {
+    "dev": "pnpm --filter @airdraw/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @airdraw/web test:e2e",
+    "dataset:generate": "pnpm --filter @airdraw/dataset generate",
+    "dataset:inspect": "pnpm --filter @airdraw/dataset inspect",
+    "ml:train": "pnpm --filter @airdraw/training train",
+    "ml:evaluate": "pnpm --filter @airdraw/training evaluate",
+    "ml:export": "pnpm --filter @airdraw/training export"
+  },
+  "devDependencies": { "typescript": "5.7.3" }
+}

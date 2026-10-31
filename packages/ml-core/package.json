@@ -1,0 +1,11 @@
+{
+  "name": "@airdraw/ml-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist"],
+  "scripts": { "build": "tsc -p tsconfig.json", "test": "vitest run --passWithNoTests" },
+  "dependencies": { "@airdraw/contracts": "workspace:*" },
+  "devDependencies": { "vitest": "2.1.9" }
+}

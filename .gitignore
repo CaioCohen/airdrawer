@@ -1,0 +1,21 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.vite/
+playwright-report/
+test-results/
+
+# Generated datasets, real captures, and transient training state
+datasets/generated/
+datasets/real-test/
+artifacts/checkpoints/
+artifacts/*.tmp
+*.log
+
+# Local environment/editor files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

@@ -1,0 +1,14 @@
+{
+  "name": "@airdraw/dataset",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "generate": "tsx src/cli.ts generate",
+    "inspect": "tsx src/cli.ts inspect"
+  },
+  "dependencies": { "@airdraw/contracts": "workspace:*" },
+  "devDependencies": { "@types/node": "22.10.5", "tsx": "4.19.2", "typescript": "5.7.3", "vitest": "2.1.9" }
+}
