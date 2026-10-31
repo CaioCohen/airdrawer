@@ -1,0 +1,55 @@
+{
+  "seed": 42,
+  "epochsRequested": 25,
+  "epochsCompleted": 9,
+  "learningRate": 0.001,
+  "patience": 5,
+  "batchStrategy": "per-sample",
+  "dataset": {
+    "version": "image-corpus-manifest-v1",
+    "manifestSha256": "725fb41d4681375731980809042e55708b6f789f87ae93b3c6bba0d048c0232c",
+    "samples": 1546,
+    "groups": 26,
+    "counts": {
+      "train": {
+        "circle": 567,
+        "square": 486,
+        "triangle": 486
+      },
+      "val": {
+        "circle": 2,
+        "square": 1,
+        "triangle": 1
+      },
+      "test": {
+        "circle": 1,
+        "square": 1,
+        "triangle": 1
+      }
+    }
+  },
+  "architecture": "ShapeCNN [1,32,32] -> conv4 -> pool -> conv8 -> pool -> dense32 -> logits3",
+  "bestValidationEpoch": 4,
+  "bestValidationLoss": 0.00009646026144172204,
+  "stoppedEarly": true,
+  "durationMs": 268669.7071,
+  "runtime": {
+    "node": "v22.20.0",
+    "platform": "win32 10.0.26200 x64",
+    "cpu": "AMD Ryzen 5 5600GT with Radeon Graphics        ",
+    "logicalCpus": 12
+  },
+  "limitations": [
+    "Validation has only 4 supplied examples (circle=2, square=1, triangle=1), so checkpoint selection is statistically weak.",
+    "Held-out test has 3 supplied examples and was deliberately not read for tuning or reporting by this command.",
+    "Floating-point details can vary across Node/CPU platforms despite deterministic seeds."
+  ],
+  "evaluation": {
+    "policy": {
+      "topProbabilityMinimum": 0.65,
+      "topMarginMinimum": 0.15
+    },
+    "calibratedOn": "validation before test",
+    "checkpointPath": "D:\\documentos\\pos\\M5\\capstone\\packages\\training\\artifacts\\checkpoints\\shape-cnn-v1-seed-42\\best-validation-loss.json"
+  }
+}

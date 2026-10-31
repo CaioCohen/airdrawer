@@ -1,62 +1,59 @@
 # AirDraw
 
-Aplicação acadêmica para desenhar formas no ar. Esta entrega cobre a interação: dois canvas responsivos, lousa por mouse/toque, webcam opcional, landmarks de mão e gesto de pinça. O classificador, o pré-processamento, o dataset e o treino ainda **não** fazem parte desta fase; por isso a área de predição informa “Ainda não sei”.
+Aplicação acadêmica para desenhar círculo, quadrado e triângulo na lousa com mouse/toque ou, opcionalmente, por câmera e pinça. A classificação é uma CNN TypeScript treinada do zero; não há framework de ML, API de classificação nem envio de vídeo.
 
-## Requisitos e início
+> **Escopo da evidência:** o modelo publicado foi treinado e avaliado somente no corpus raster fornecido. Ele não foi validado com webcam, pessoas ou traços parciais; consulte [Limitações](docs/LIMITATIONS.md) antes de interpretar uma predição.
 
-Node.js 20.11+ e pnpm 9.15.4+.
+## Requisitos e instalação
+
+- Node.js `>=20.11.0` (a execução registrada usou `v22.20.0`)
+- pnpm `>=9.15.4` (fixado em `package.json`)
+- navegador desktop atual com `localhost` ou HTTPS para a câmera
 
 ```bash
-pnpm install
-pnpm dev
-pnpm build
+pnpm install --frozen-lockfile
+pnpm dataset:generate --seed 42
+pnpm dataset:inspect
+pnpm ml:train --seed 42 --epochs 25 --lr 0.001 --patience 5
+pnpm ml:evaluate --seed 42 --split test
+pnpm ml:export --seed 42
 pnpm test
+pnpm build
 pnpm test:e2e
+pnpm dev
 ```
 
-Abra a URL informada pelo Vite em `localhost` ou use HTTPS: navegadores só concedem câmera em contexto seguro. Os comandos futuros `dataset:generate`, `dataset:inspect`, `ml:train`, `ml:evaluate` e `ml:export` continuam deliberadamente indisponíveis até suas fases próprias.
+Os comandos de treino escrevem em `packages/training/artifacts/` (ignorado pelo Git); `ml:export` instala a cópia servida em `apps/web/public/models/shape-cnn.v1.json`. Execute-os nessa ordem em um checkout limpo. A reprodução registrada levou 268,67 s para treinar, portanto não é adequada para iniciar junto com a aplicação.
 
-## Como usar
+## Uso e privacidade
 
-- Sem câmera, o modo inicial é **Mouse**. Desenhe na lousa com mouse, caneta ou toque; o cursor indica a posição. Cada pressionamento/soltura cria um stroke independente.
-- Use **Limpar lousa** para remover todos os strokes, ou **Desfazer** para remover somente o último. Ambos encerram qualquer interação em curso.
-- Para desenhar no ar, escolha **Modo: Câmera** e depois **Iniciar câmera**. Conceda a permissão do navegador, mantenha uma mão no enquadramento e una polegar e indicador para iniciar o stroke. Separe os dedos ou retire a mão do quadro para encerrá-lo; uma nova pinça começa outro stroke, sem ligar os dois.
-- **Parar câmera** encerra as tracks e o loop de desenho. Uma mensagem acionável é exibida quando a permissão é negada, não há câmera, o dispositivo está ocupado, o navegador não oferece suporte ou o rastreador não inicia.
+- **Mouse** é o modo inicial. Desenhe com mouse, caneta ou toque; cada pressionamento/soltura é um stroke independente. Use **Limpar lousa** ou **Desfazer** para invalidar a previsão atual.
+- Para câmera, escolha **Modo: Câmera**, clique **Iniciar câmera** e conceda permissão. Junte polegar e indicador para desenhar; separe-os ou retire a mão do quadro para terminar o stroke. Uma nova pinça nunca é ligada artificialmente à anterior.
+- A câmera é solicitada somente após o clique. Vídeo, frames e landmarks ficam em memória e não são enviados nem armazenados. **Salvar referência** requer confirmação e salva apenas os strokes no `localStorage`; a captura humana não entra automaticamente em treino.
+- Permissão negada, câmera ausente/ocupada, contexto inseguro e falha do rastreador devem manter o modo Mouse utilizável.
 
-## Privacidade e referências locais
+O MediaPipe `@mediapipe/tasks-vision` é usado somente para landmarks de mão e gesto de pinça. Ele não reconhece formas; a probabilidade vem da CNN local. O modelo Hand Landmarker e os arquivos WASM são obtidos pelo pacote MediaPipe no navegador, sujeitos aos seus termos/licença de distribuição.
 
-A câmera só é solicitada após o clique em **Iniciar câmera**. Vídeo, frames e landmarks não são armazenados nem enviados: eles são usados em memória apenas para desenhar a prévia e o cursor.
+## Arquitetura
 
-O painel **Salvar referência** só libera a ação após haver traços e confirmação explícita. Ele grava somente os strokes da lousa no `localStorage` deste navegador. A referência pode ser revisada, exportada como JSON/PNG ou apagada.
+```text
+webcam -> landmarks MediaPipe -> pinça -> Drawing (strokes)
+mouse/toque ------------------------------> Drawing (strokes)
+Drawing -> preprocessDrawing [1,32,32] -> ShapeCNN -> 3 probabilidades
+```
 
-- Em `pnpm dev`, **Exportar PNG da lousa** grava automaticamente em `docs/images/` como `rotulo-n.png` (por exemplo, `circle-1.png`, depois `circle-2.png`).
-- Em uma build publicada, o mesmo botão faz download automático com `rotulo-n.png`; o contador é local ao navegador, pois uma hospedagem estática não pode enumerar ou escrever em `docs/images/`.
+A CNN própria usa `conv(4) -> max-pool -> conv(8) -> max-pool -> dense(32) -> logits(3)`, softmax/cross-entropy e Adam implementados no repositório. A ordem fixa é `circle=0`, `square=1`, `triangle=2`. O navegador valida o artefato e só mostra o rótulo principal quando `top >= 0,65` e `margem >= 0,15`; caso contrário mostra **Ainda não sei**.
 
-O modo é controlado por `VITE_PNG_EXPORT_MODE`: `.env.development` usa `local-server` e `.env.production` usa `download`. Valores inválidos, ou `local-server` em produção, interrompem a inicialização para impedir uma publicação configurada incorretamente. Variáveis `VITE_*` são públicas: nunca armazene segredos nelas. A importação JSON é validada antes de ser aceita. Capturas humanas voluntárias devem ser exportadas e importadas conscientemente; `datasets/real-test/` é ignorado pelo Git e não entra automaticamente em treino.
+## Reprodução e evidências
 
-## Limitações conhecidas
+- [Dataset e auditoria](docs/DATASET.md)
+- [Pré-processamento](docs/PREPROCESSING.md)
+- [Treino](docs/TRAINING.md)
+- [Avaliação](docs/EVALUATION.md)
+- [Limitações e Definition of Done](docs/LIMITATIONS.md)
 
-- O MediaPipe rastreia mãos; ele não reconhece círculo, quadrado ou triângulo.
-- Não há CNN, pré-processamento, probabilidades ou classificação nesta fase.
-- A pinça usa limiares normalizados com histerese, mas iluminação, enquadramento, oclusão, ângulo e diferenças entre câmeras podem exigir calibração futura.
-- O rastreamento e a webcam dependem de navegador compatível, conexão segura e um modelo MediaPipe que possa ser carregado.
-- O cursor e a tinta são atualizados imperativamente no canvas para não renderizar React por frame ou ponto; React é atualizado apenas nas transições da interação e nos controles.
+O artefato servido é [`shape-cnn.v1.json`](apps/web/public/models/shape-cnn.v1.json), SHA-256 `dd6e7873ca27b51e46c69da807cd21de83d8bd51b7d5b304e0e331947f025a9c`. Ele declara `status: trained`, seed 42 e hash do manifesto `725fb41d4681375731980809042e55708b6f789f87ae93b3c6bba0d048c0232c`.
 
-## Roteiro manual obrigatório de webcam real
+## Roteiro manual de webcam (pendente)
 
-Este roteiro está documentado, mas **não foi executado nesta máquina nesta entrega**, pois não houve uma webcam física disponível ao agente.
-
-1. Execute `pnpm dev` em `localhost`/HTTPS e abra a página em um navegador com webcam.
-2. Confirme os dois canvas e desenhe dois strokes separados no modo Mouse; valide Limpar e Desfazer.
-3. Troque para o modo Câmera, inicie a câmera e conceda permissão. Confirme prévia espelhada, indicador “Mão detectada” e cursor sobre a lousa.
-4. Faça uma pinça, mova o indicador e solte. Faça outra pinça distante; confirme que não há segmento ligando os strokes.
-5. Retire a mão do quadro durante uma pinça, redimensione a janela e pare a câmera; confirme encerramento limpo do stroke, redraw correto e ausência de travamento.
-6. Repita negando a permissão e com outro app segurando a webcam; confirme as mensagens e que o modo Mouse segue utilizável.
-
-## Verificação e medições
-
-Nesta entrega foram executados com sucesso `pnpm test` (31 testes do web, além dos workspaces), `pnpm build` e `pnpm test:e2e` (5 cenários em modo Mouse). Não foi feita medição de FPS/deteções em hardware com webcam física; portanto não há métrica de desempenho declarada. O loop evita detecção duplicada para o mesmo frame de vídeo e não agenda atualizações React por ponto/frame.
-
-## Estrutura e fronteira de fase
-
-O fluxo de integração é `webcam → landmarks → gesto → Drawing`. O contrato `Drawing` preserva coordenadas normalizadas e limites de stroke; será a única entrada da fase posterior de pré-processamento. Veja [a arquitetura](docs/ARCHITECTURE.md) para a separação entre browser, núcleo isomórfico e CLIs Node.
+Esta máquina não forneceu webcam física para executar o roteiro. Em um navegador desktop suportado, após `pnpm dev`: confirme dois canvas; desenhe dois strokes no Mouse; inicie a câmera; valide prévia espelhada, cursor e pinça; interrompa uma pinça retirando a mão; redimensione a janela; pare a câmera; e repita negando a permissão. Não há medição declarada de FPS, latência de inferência no navegador ou taxa de acerto nesse roteiro.

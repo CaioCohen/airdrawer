@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": { "dev": "vite", "build": "tsc -b && vite build", "test": "vitest run", "test:e2e": "playwright test" },
-  "dependencies": { "@airdraw/contracts": "workspace:*", "@mediapipe/tasks-vision": "0.10.18", "react": "18.3.1", "react-dom": "18.3.1" },
+  "dependencies": { "@airdraw/contracts": "workspace:*", "@airdraw/ml-core": "workspace:*", "@mediapipe/tasks-vision": "0.10.18", "react": "18.3.1", "react-dom": "18.3.1" },
   "devDependencies": {
     "@playwright/test": "1.50.1", "@testing-library/react": "16.1.0", "@types/node": "22.10.5", "@types/react": "18.3.18", "@types/react-dom": "18.3.5",
     "@vitejs/plugin-react": "4.3.4", "jsdom": "25.0.1", "typescript": "5.7.3", "vite": "5.4.14", "vitest": "2.1.9"

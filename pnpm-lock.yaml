@@ -17,6 +17,9 @@ importers:
       '@airdraw/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@airdraw/ml-core':
+        specifier: workspace:*
+        version: link:../../packages/ml-core
       '@mediapipe/tasks-vision':
         specifier: 0.10.18
         version: 0.10.18
@@ -98,6 +101,9 @@ importers:
       '@airdraw/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@airdraw/dataset':
+        specifier: workspace:*
+        version: link:../dataset
       '@airdraw/ml-core':
         specifier: workspace:*
         version: link:../ml-core

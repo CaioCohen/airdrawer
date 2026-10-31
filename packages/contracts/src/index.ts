@@ -14,11 +14,17 @@ export interface Drawing {
   readonly revision: number;
   readonly strokes: readonly Stroke[];
 }
-export interface PreprocessResult {
-  readonly tensor: Float32Array;
-  readonly shape: readonly [1, 32, 32];
-  readonly hasInk: boolean;
-}
+/** Versioned, shared input representation consumed by the shape classifier. */
+export type PreprocessResult =
+  | { readonly kind: "empty"; readonly reason: "no-ink" | "too-short" }
+  | {
+      readonly kind: "ready";
+      /** Channel-first [1, 32, 32], in row-major order. */
+      readonly tensor: Float32Array;
+      readonly width: 32;
+      readonly height: 32;
+      readonly inkFraction: number;
+    };
 
 export function assertNormalizedPoint(point: Point2D): asserts point is Point2D {
   if (!Number.isFinite(point.x) || !Number.isFinite(point.y) || point.x < 0 || point.x > 1 || point.y < 0 || point.y > 1) {

@@ -1,0 +1,37 @@
+{
+  "version": "image-corpus-manifest-v1",
+  "seed": 42,
+  "corpus": "scripts/images/manifest.csv",
+  "preprocessVersion": "image-corpus-v1",
+  "manifestSha256": "725fb41d4681375731980809042e55708b6f789f87ae93b3c6bba0d048c0232c",
+  "samples": 1546,
+  "groups": 26,
+  "identicalPngChecksums": 1,
+  "counts": {
+    "train": {
+      "circle": 567,
+      "square": 486,
+      "triangle": 486
+    },
+    "val": {
+      "circle": 2,
+      "square": 1,
+      "triangle": 1
+    },
+    "test": {
+      "circle": 1,
+      "square": 1,
+      "triangle": 1
+    }
+  },
+  "note": "The supplied split is preserved because it is already assigned by label:source before augmentation. Validation and test contain only 4 and 3 samples respectively and are statistically weak; no metrics are implied.",
+  "evaluatedSplit": "test",
+  "evaluationExamples": 3,
+  "visibleFractions": {
+    "status": "unavailable",
+    "observed": [
+      1
+    ],
+    "reason": "No partial trajectories in supplied corpus."
+  }
+}

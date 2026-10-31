@@ -1,0 +1,61 @@
+{
+  "selectedOn": "validation",
+  "policy": {
+    "topProbabilityMinimum": 0.65,
+    "topMarginMinimum": 0.15
+  },
+  "selection": "Frozen initial policy; no search or optimization was performed.",
+  "validation": {
+    "examples": 4,
+    "correct": 4,
+    "accuracy": 1,
+    "accepted": 4,
+    "abstained": 0,
+    "abstentionRate": 0,
+    "acceptedAccuracy": 1,
+    "confusionMatrix": [
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "perClass": {
+      "circle": {
+        "support": 2,
+        "correct": 2,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "square": {
+        "support": 1,
+        "correct": 1,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "triangle": {
+        "support": 1,
+        "correct": 1,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      }
+    }
+  },
+  "limitation": "Validation has only 4 examples, so this measurement is statistically weak and does not establish calibration."
+}

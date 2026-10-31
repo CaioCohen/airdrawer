@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "evaluatedSplit": "test",
+  "evaluatedAt": "2026-10-31T19:38:50.573Z",
+  "model": {
+    "version": "shape-cnn-v1",
+    "checkpoint": "D:\\documentos\\pos\\M5\\capstone\\packages\\training\\artifacts\\checkpoints\\shape-cnn-v1-seed-42\\best-validation-loss.json",
+    "selectedBy": "best validation loss",
+    "bestValidationEpoch": 4
+  },
+  "classOrder": [
+    "circle",
+    "square",
+    "triangle"
+  ],
+  "dataset": {
+    "manifestSha256": "725fb41d4681375731980809042e55708b6f789f87ae93b3c6bba0d048c0232c",
+    "groups": 26,
+    "counts": {
+      "train": {
+        "circle": 567,
+        "square": 486,
+        "triangle": 486
+      },
+      "val": {
+        "circle": 2,
+        "square": 1,
+        "triangle": 1
+      },
+      "test": {
+        "circle": 1,
+        "square": 1,
+        "triangle": 1
+      }
+    },
+    "corpus": "scripts/images/manifest.csv"
+  },
+  "uncertaintyPolicy": {
+    "topProbabilityMinimum": 0.65,
+    "topMarginMinimum": 0.15
+  },
+  "overall": {
+    "examples": 3,
+    "correct": 3,
+    "accuracy": 1,
+    "accepted": 3,
+    "abstained": 0,
+    "abstentionRate": 0,
+    "acceptedAccuracy": 1,
+    "confusionMatrix": [
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "perClass": {
+      "circle": {
+        "support": 1,
+        "correct": 1,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "square": {
+        "support": 1,
+        "correct": 1,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      },
+      "triangle": {
+        "support": 1,
+        "correct": 1,
+        "accuracy": 1,
+        "precision": 1,
+        "recall": 1,
+        "f1": 1
+      }
+    }
+  },
+  "byVisibleFraction": {
+    "status": "unavailable",
+    "observedFractions": [
+      1
+    ],
+    "reason": "The supplied corpus has complete raster images only (visibleFraction=1); no trajectories or partial-prefix samples exist, so fraction metrics are intentionally not fabricated."
+  },
+  "browserInferenceTiming": {
+    "status": "not-measured",
+    "reason": "No browser/hardware timing was run in this CLI evaluation; the p95 < 50 ms and 100–250 ms update goals are not claimed."
+  },
+  "limitations": [
+    "Test contains only 3 examples (one per class), so reported values are descriptive, not reliable performance estimates.",
+    "No consented real-test samples were found or evaluated; synthetic/manual-raster results are not human-drawing results.",
+    "The supplied corpus has no partial trajectories, so prefix/fraction metrics are unavailable."
+  ]
+}

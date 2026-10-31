@@ -10,6 +10,6 @@
     "evaluate": "tsx src/cli.ts evaluate",
     "export": "tsx src/cli.ts export"
   },
-  "dependencies": { "@airdraw/contracts": "workspace:*", "@airdraw/ml-core": "workspace:*" },
+  "dependencies": { "@airdraw/contracts": "workspace:*", "@airdraw/dataset": "workspace:*", "@airdraw/ml-core": "workspace:*" },
   "devDependencies": { "@types/node": "22.10.5", "tsx": "4.19.2", "typescript": "5.7.3", "vitest": "2.1.9" }
 }

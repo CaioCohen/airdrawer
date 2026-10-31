@@ -1,4 +1,4 @@
-import { SHAPE_LABELS, type Drawing } from "@airdraw/contracts";
+import { type Drawing } from "@airdraw/contracts";
 import { useCallback, useRef, useState } from "react";
 import { Toolbar } from "./components/Toolbar";
 import { WebcamCanvas, type CameraVisualState, type WebcamCanvasHandle } from "./components/WebcamCanvas";
@@ -9,6 +9,10 @@ import { StrokeController } from "./drawing/StrokeController";
 import { ReferencePanel } from "./references/ReferencePanel";
 import { AirDrawingController } from "./tracking/AirDrawingController";
 import type { HandTrackingResult } from "./tracking/HandTracker";
+import { PredictionPanel } from "./prediction/PredictionPanel";
+import { loadProductionModel, useShapePrediction } from "./prediction/useShapePrediction";
+
+const productionModelLoader = loadProductionModel();
 
 export function App() {
   const controller = useRef(new StrokeController()).current;
@@ -19,6 +23,9 @@ export function App() {
   const [mode, setMode] = useState<"mouse" | "camera">("mouse");
   const [cameraState, setCameraState] = useState<CameraVisualState>("off");
   const [handState, setHandState] = useState<HandTrackingVisualState>("not-detected");
+  // Mouse and camera update this same Drawing snapshot and use the same
+  // validated, trained artifact; there is no shape heuristic fallback.
+  const prediction = useShapePrediction(drawing, productionModelLoader);
   const updateDrawing = (next: Drawing) => setDrawing(next);
   const handLabel = handState === "detected" ? "detectada" : handState === "initializing" ? "inicializando" : handState === "error" ? "erro no rastreamento" : "não detectada";
   const onHandFrame = useCallback((result: HandTrackingResult, video: HTMLVideoElement, canvas: HTMLCanvasElement) => {
@@ -48,7 +55,7 @@ export function App() {
       <WebcamCanvas ref={camera} onCameraChange={onCameraChange} onHandChange={setHandState} onHandFrame={onHandFrame} />
       <WhiteboardCanvas ref={whiteboard} drawing={drawing} mode={mode} controller={controller} onDrawingChange={updateDrawing} />
     </section>
-    <section aria-label="Predição" className="prediction"><h2>Predição</h2><p>Ainda não sei — aguardando desenho.</p><ul>{SHAPE_LABELS.map((label) => <li key={label}>{label}: —</li>)}</ul></section>
+    <PredictionPanel prediction={prediction} />
     <Toolbar canUndo={drawing.strokes.length > 0} canClear={drawing.strokes.length > 0} mode={mode} cameraState={cameraState} onUndo={() => updateDrawing(controller.undo())} onClear={() => updateDrawing(controller.clear())} onToggleMode={changeMode} onStartCamera={() => { void camera.current?.start(); }} onStopCamera={() => { updateDrawing(airDrawing.stop()); whiteboard.current?.setCameraCursor(null); camera.current?.stop(); }} />
     <ReferencePanel drawing={drawing} mode={mode} onLoad={(reference) => updateDrawing(controller.replaceDrawing(reference.drawing))} exportPng={() => whiteboard.current?.exportPng() ?? Promise.resolve(null)} />
   </main>;

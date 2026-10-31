@@ -11,6 +11,7 @@ datasets/generated/
 datasets/real-test/
 artifacts/checkpoints/
 artifacts/*.tmp
+scripts/images/
 *.log
 
 # Local environment/editor files
